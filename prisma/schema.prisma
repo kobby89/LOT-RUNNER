@@ -1,0 +1,72 @@
+// Lotrunner data model.
+// One table does most of the work at this stage: a Request tracks a
+// customer's ask all the way from "submitted" to "picked up."
+// Split this out into Customer / Vehicle / Invoice tables once volume
+// justifies it — no need to over-normalize for a v1.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RequestStatus {
+  SUBMITTED          // customer sent the request, no quote yet
+  QUOTE_SENT         // we've priced it and sent a quote
+  QUOTE_APPROVED     // customer approved the quote
+  DEPOSIT_RECEIVED   // customer paid the deposit
+  BIDDING_LIVE       // we're actively bidding / buy-it-now in progress
+  WON                // we won the auction / completed the purchase
+  LOST                // we did not win (budget exceeded, outbid, etc.)
+  INVOICED           // final invoice sent to customer
+  READY_FOR_PICKUP   // paid in full, vehicle ready for handoff
+  CANCELLED          // request withdrawn by customer or us
+}
+
+model Request {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // --- who's asking ---
+  customerName  String
+  contactEmail  String
+  contactPhone  String?
+
+  // --- what they want ---
+  lotNumber   String?   // if they already found a specific listing
+  makeModel   String?
+  yearRangeMin Int?
+  yearRangeMax Int?
+  maxBudget   Float?    // customer's all-in ceiling
+  notes       String?
+
+  // --- our quote (set once we've reviewed the real listing) ---
+  quotedHammer      Float?   // expected/actual winning bid
+  quotedAuctionFees Float?   // auction house + doc fees
+  feePercent        Float    @default(0.10) // Lotrunner's cut, e.g. 0.10 = 10%
+  quotedTotal       Float?   // hammer + auctionFees + (hammer * feePercent)
+
+  status RequestStatus @default(SUBMITTED)
+
+  statusEvents StatusEvent[]
+
+  @@index([status])
+  @@index([contactEmail])
+}
+
+// Lightweight audit trail so a customer's dashboard can show a real
+// timeline ("Bidding started July 24, 9:02am") instead of just a pill.
+model StatusEvent {
+  id        String        @id @default(cuid())
+  requestId String
+  request   Request       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  status    RequestStatus
+  note      String?
+  createdAt DateTime      @default(now())
+
+  @@index([requestId])
+}

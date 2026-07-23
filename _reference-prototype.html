@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOTRUNNER — We Bid, You Win</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asphalt:#1C1B19;
+    --asphalt-2:#26241f;
+    --concrete:#EDEAE3;
+    --chalk:#FAFAF7;
+    --safety:#FF6A13;
+    --safety-dim:#c9540e;
+    --steel:#35506B;
+    --rust:#8B3A2B;
+    --line:#3a3833;
+    --line-light:#d8d3c7;
+    --disp:'Oswald',sans-serif;
+    --stencil:'Archivo Black',sans-serif;
+    --body:'IBM Plex Sans',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--concrete);
+    color:var(--asphalt);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+  /* perforated divider — the ticket-tear motif used throughout */
+  .tear{
+    height:22px;
+    background:
+      radial-gradient(circle 8px at 0 50%, transparent 8px, var(--concrete) 8.5px) 0 0/28px 100% repeat-x;
+    position:relative;
+  }
+  .tear.on-asphalt{
+    background:
+      radial-gradient(circle 8px at 0 50%, transparent 8px, var(--asphalt) 8.5px) 0 0/28px 100% repeat-x;
+  }
+
+  /* ===== NAV ===== */
+  header.site{
+    background:var(--asphalt);
+    color:var(--chalk);
+    border-bottom:3px solid var(--safety);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;max-width:1180px;margin:0 auto;
+  }
+  .brand{
+    font-family:var(--stencil);
+    font-size:22px;letter-spacing:0.5px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .brand .dot{width:10px;height:10px;background:var(--safety);display:inline-block;transform:rotate(45deg);}
+  nav.links{display:flex;gap:28px;font-family:var(--disp);font-size:14px;letter-spacing:1px;text-transform:uppercase;}
+  nav.links a{text-decoration:none;color:#cfcbc0;transition:color .15s;}
+  nav.links a:hover{color:var(--safety);}
+  .nav-cta{
+    font-family:var(--disp);font-weight:600;letter-spacing:1px;text-transform:uppercase;
+    background:var(--safety);color:var(--asphalt);padding:10px 18px;
+    border:none;cursor:pointer;font-size:13px;
+    clip-path:polygon(0 0,100% 0,100% 70%,94% 100%,0 100%);
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    background:var(--asphalt);color:var(--chalk);
+    background-image:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 26px);
+    padding:70px 0 90px;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:56px;align-items:center;}
+  .eyebrow{
+    font-family:var(--mono);font-size:13px;color:var(--safety);
+    letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:'';width:26px;height:1px;background:var(--safety);}
+  h1.hero-h{
+    font-family:var(--disp);font-weight:700;font-size:56px;line-height:1.03;
+    margin:0 0 22px;letter-spacing:-0.5px;
+  }
+  h1.hero-h em{font-style:normal;color:var(--safety);}
+  .hero p.sub{font-size:17px;line-height:1.65;color:#cfcbc0;max-width:520px;margin-bottom:32px;}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--safety);color:var(--asphalt);border:none;
+    font-family:var(--disp);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
+    font-size:14px;padding:15px 26px;cursor:pointer;
+    clip-path:polygon(0 0,100% 0,100% 70%,95% 100%,0 100%);
+  }
+  .btn-ghost{
+    background:transparent;color:var(--chalk);border:1px solid #55524a;
+    font-family:var(--disp);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;
+    font-size:14px;padding:14px 26px;cursor:pointer;
+  }
+  .btn-ghost:hover{border-color:var(--chalk);}
+
+  /* the signature "bid ticket" stub */
+  .ticket{
+    background:var(--chalk);color:var(--asphalt);
+    position:relative;padding:26px 26px 22px;
+    box-shadow:0 22px 50px rgba(0,0,0,0.45);
+    transform:rotate(1.2deg);
+  }
+  .ticket::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:36px;
+    background:repeating-linear-gradient(0deg, var(--asphalt) 0 6px, transparent 6px 14px);
+    opacity:0.08;
+  }
+  .ticket-top{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px dashed var(--line-light);padding-bottom:14px;margin-bottom:14px;}
+  .ticket-top .lot{font-family:var(--mono);font-size:12px;color:#8a8578;letter-spacing:1px;}
+  .ticket-top .stamp{
+    font-family:var(--disp);font-weight:700;font-size:11px;letter-spacing:1px;
+    color:var(--safety);border:1.5px solid var(--safety);padding:3px 8px;
+    transform:rotate(-6deg);
+  }
+  .ticket-car{font-family:var(--disp);font-weight:600;font-size:21px;margin-bottom:4px;}
+  .ticket-meta{display:flex;gap:16px;font-family:var(--mono);font-size:12px;color:#6b6759;margin-bottom:18px;flex-wrap:wrap;}
+  .ticket-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #e3dfd4;font-size:14px;}
+  .ticket-row:last-child{border-bottom:none;}
+  .ticket-row .label{color:#6b6759;}
+  .ticket-row .val{font-family:var(--mono);font-weight:600;}
+  .ticket-row.total .val{color:var(--safety-dim);font-size:18px;}
+  .barcode{height:34px;margin-top:14px;background:repeating-linear-gradient(90deg,var(--asphalt) 0 2px,transparent 2px 4px,var(--asphalt) 4px 5px,transparent 5px 9px);opacity:0.85;}
+
+  /* ===== SECTION HEADS ===== */
+  .section{padding:80px 0;}
+  .section.on-asphalt{background:var(--asphalt);color:var(--chalk);}
+  .sec-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--safety-dim);margin-bottom:10px;}
+  .on-asphalt .sec-eyebrow{color:var(--safety);}
+  h2.sec-h{font-family:var(--disp);font-weight:700;font-size:36px;margin:0 0 14px;letter-spacing:-0.3px;}
+  .sec-lead{font-size:16px;line-height:1.6;color:#5a564a;max-width:600px;margin-bottom:44px;}
+  .on-asphalt .sec-lead{color:#cfcbc0;}
+
+  /* ===== HOW IT WORKS ===== */
+  .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+  .flow-step{padding:0 20px 0 0;position:relative;}
+  .flow-step:not(:last-child)::after{
+    content:'→';position:absolute;right:-6px;top:8px;color:#55524a;font-size:20px;
+  }
+  .flow-num{font-family:var(--mono);font-size:12px;color:var(--safety);margin-bottom:10px;}
+  .flow-title{font-family:var(--disp);font-weight:600;font-size:18px;margin-bottom:8px;}
+  .flow-desc{font-size:14px;line-height:1.55;color:#b8b4a8;}
+
+  /* ===== INVENTORY SAMPLE ===== */
+  .lot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .lot-card{
+    background:var(--chalk);border:1px solid var(--line-light);
+    position:relative;overflow:hidden;
+  }
+  .lot-photo{
+    height:150px;background:linear-gradient(135deg,#c9c4b6,#a9a495);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;color:#5a564a;letter-spacing:1px;
+    border-bottom:1px solid var(--line-light);
+  }
+  .lot-body{padding:18px;}
+  .lot-tag{
+    font-family:var(--mono);font-size:11px;color:var(--safety-dim);letter-spacing:1px;margin-bottom:6px;
+  }
+  .lot-title{font-family:var(--disp);font-weight:600;font-size:18px;margin-bottom:10px;}
+  .lot-specs{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12.5px;color:#5a564a;margin-bottom:14px;}
+  .lot-specs b{color:var(--asphalt);font-weight:600;}
+  .lot-price-row{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--line-light);padding-top:12px;}
+  .lot-price-row .now{font-family:var(--mono);font-weight:700;font-size:16px;}
+  .lot-btn{
+    font-family:var(--disp);font-weight:600;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;
+    background:var(--asphalt);color:var(--chalk);border:none;padding:9px 14px;cursor:pointer;
+  }
+  .disclosure-note{
+    margin-top:20px;font-family:var(--mono);font-size:12px;color:#8a8578;line-height:1.6;
+    border-left:2px solid var(--safety);padding-left:14px;
+  }
+
+  /* ===== QUOTE CALCULATOR ===== */
+  .calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;}
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;
+    color:#6b6759;margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%;padding:12px 14px;border:1px solid var(--line-light);background:var(--chalk);
+    font-family:var(--body);font-size:15px;color:var(--asphalt);
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--safety);outline-offset:1px;}
+
+  .quote-ticket{background:var(--chalk);border:1px solid var(--line-light);padding:24px;}
+  .quote-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px dashed var(--line-light);font-size:14.5px;}
+  .quote-row .val{font-family:var(--mono);}
+  .quote-row.fee .val{color:var(--safety-dim);font-weight:600;}
+  .quote-row.total{border-bottom:none;border-top:2px solid var(--asphalt);margin-top:6px;padding-top:16px;}
+  .quote-row.total .label{font-family:var(--disp);font-weight:600;font-size:16px;}
+  .quote-row.total .val{font-family:var(--mono);font-weight:700;font-size:22px;}
+  .quote-fine{font-size:12px;color:#8a8578;margin-top:14px;line-height:1.6;}
+
+  /* ===== DASHBOARD PREVIEW ===== */
+  .dash{background:var(--chalk);border:1px solid var(--line-light);}
+  .dash-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line-light);}
+  .dash-head .h{font-family:var(--disp);font-weight:600;font-size:16px;}
+  .status-pill{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;background:var(--steel);color:var(--chalk);}
+  .track{display:grid;grid-template-columns:repeat(5,1fr);padding:26px 22px 30px;gap:0;}
+  .track-step{text-align:center;position:relative;}
+  .track-step .node{width:16px;height:16px;border-radius:50%;background:var(--line-light);margin:0 auto 10px;border:2px solid var(--chalk);position:relative;z-index:2;}
+  .track-step.done .node{background:var(--safety);}
+  .track-step.active .node{background:var(--steel);box-shadow:0 0 0 4px rgba(53,80,107,0.18);}
+  .track-step::before{
+    content:'';position:absolute;top:7px;left:-50%;width:100%;height:2px;background:var(--line-light);z-index:1;
+  }
+  .track-step:first-child::before{display:none;}
+  .track-step.done::before, .track-step.active::before{background:var(--safety);}
+  .track-step .t-label{font-family:var(--mono);font-size:11px;color:#6b6759;}
+  .track-step.active .t-label, .track-step.done .t-label{color:var(--asphalt);font-weight:600;}
+
+  /* ===== FORM ===== */
+  .req-panel{background:var(--asphalt);color:var(--chalk);padding:44px;}
+  .req-panel .field label{color:#b8b4a8;}
+  .req-panel .field input, .req-panel .field select{background:#2e2c26;border-color:#4a473e;color:var(--chalk);}
+  .req-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;}
+  .req-submit{margin-top:8px;}
+
+  /* ===== FOOTER ===== */
+  footer{background:var(--asphalt);color:#8a8578;padding:44px 0 30px;font-size:13px;}
+  .foot-grid{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;border-bottom:1px solid #3a3833;padding-bottom:28px;margin-bottom:20px;}
+  .foot-brand{font-family:var(--stencil);color:var(--chalk);font-size:18px;max-width:280px;}
+  .foot-legal{max-width:520px;line-height:1.6;font-family:var(--mono);font-size:11.5px;}
+
+  @media(max-width:860px){
+    .hero-grid, .calc-grid, .req-form-grid{grid-template-columns:1fr;}
+    .lot-grid{grid-template-columns:1fr;}
+    .flow{grid-template-columns:1fr;gap:26px;}
+    .flow-step::after{display:none;}
+    h1.hero-h{font-size:38px;}
+    .track{grid-template-columns:1fr;gap:20px;}
+    .track-step::before{display:none;}
+    nav.links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="nav">
+    <div class="brand"><span class="dot"></span>LOTRUNNER</div>
+    <nav class="links">
+      <a href="#how">How it works</a>
+      <a href="#inventory">Sample lots</a>
+      <a href="#quote">Get a quote</a>
+      <a href="#request">Request a car</a>
+    </nav>
+    <button class="nav-cta">Request a Car</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Salvage &amp; insurance-auction concierge</div>
+      <h1 class="hero-h">You don't need a<br>dealer license.<br><em>You need us.</em></h1>
+      <p class="sub">Tell us the car. We source it, bid it, or buy it outright through our licensed auction accounts — you never touch a login you don't have access to. One flat 10% service fee, shown before you commit. No surprises at pickup.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">Submit a Request</button>
+        <button class="btn-ghost">See How Pricing Works</button>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="ticket-top">
+        <span class="lot">LOT #48291 — CLAIM STUB</span>
+        <span class="stamp">WON</span>
+      </div>
+      <div class="ticket-car">2021 Honda CR-V 1.5L</div>
+      <div class="ticket-meta">
+        <span>60,916 mi</span><span>Front End</span><span>Run &amp; Drive</span>
+      </div>
+      <div class="ticket-row"><span class="label">Winning auction bid</span><span class="val">$9,850</span></div>
+      <div class="ticket-row"><span class="label">Auction &amp; doc fees</span><span class="val">$680</span></div>
+      <div class="ticket-row"><span class="label">Lotrunner service (10%)</span><span class="val">$1,053</span></div>
+      <div class="ticket-row total"><span class="label">You pay</span><span class="val">$11,583</span></div>
+      <div class="barcode"></div>
+    </div>
+  </div>
+</section>
+
+<div class="tear on-asphalt"></div>
+
+<section class="section on-asphalt" id="how">
+  <div class="wrap">
+    <div class="sec-eyebrow">The process</div>
+    <h2 class="sec-h">Four steps, no license required</h2>
+    <p class="sec-lead">We hold the accredited auction accounts. You get the car. Here's exactly what happens between your request and pickup.</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">STEP 01</div>
+        <div class="flow-title">You send the request</div>
+        <div class="flow-desc">A specific lot, or a make/model/budget. Either works.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 02</div>
+        <div class="flow-title">We quote the ceiling</div>
+        <div class="flow-desc">You approve a max bid or Buy-It-Now price, fee included, before we act.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 03</div>
+        <div class="flow-title">We bid or buy it</div>
+        <div class="flow-desc">Through our own licensed auction account. You track status live.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">STEP 04</div>
+        <div class="flow-title">You pay &amp; pick up</div>
+        <div class="flow-desc">Final invoice matches the quote exactly. Title transfers to you.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"></div>
+
+<section class="section" id="inventory">
+  <div class="wrap">
+    <div class="sec-eyebrow">Example listings</div>
+    <h2 class="sec-h">What comes through the network</h2>
+    <p class="sec-lead">Illustrative examples of the kind of salvage &amp; clean-title inventory we source on request — not a live feed. Send us a lot number and we'll pull the real listing and quote it.</p>
+
+    <div class="lot-grid">
+      <div class="lot-card">
+        <div class="lot-photo">PHOTO ON REQUEST</div>
+        <div class="lot-body">
+          <div class="lot-tag">SAMPLE · RUN &amp; DRIVE VERIFIED</div>
+          <div class="lot-title">2016 Honda Civic 1.5L</div>
+          <div class="lot-specs">
+            <span>Odometer <b>41,200 mi</b></span>
+            <span>Damage <b>Front End</b></span>
+            <span>Title <b>Clean</b></span>
+            <span>Location <b>Albuquerque, NM</b></span>
+          </div>
+          <div class="lot-price-row">
+            <span class="now">Est. all-in ~$8,900</span>
+            <button class="lot-btn">Quote This</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lot-card">
+        <div class="lot-photo">PHOTO ON REQUEST</div>
+        <div class="lot-body">
+          <div class="lot-tag">SAMPLE · SALVAGE TITLE</div>
+          <div class="lot-title">2015 Honda Accord 3.5L</div>
+          <div class="lot-specs">
+            <span>Odometer <b>58,400 mi</b></span>
+            <span>Damage <b>Right Rear</b></span>
+            <span>Title <b>NV Salvage</b></span>
+            <span>Location <b>Las Vegas, NV</b></span>
+          </div>
+          <div class="lot-price-row">
+            <span class="now">Est. all-in ~$5,600</span>
+            <button class="lot-btn">Quote This</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lot-card">
+        <div class="lot-photo">PHOTO ON REQUEST</div>
+        <div class="lot-body">
+          <div class="lot-tag">SAMPLE · RUN &amp; DRIVE VERIFIED</div>
+          <div class="lot-title">2022 Honda CR-V 1.5L</div>
+          <div class="lot-specs">
+            <span>Odometer <b>9,900 mi</b></span>
+            <span>Damage <b>Rear End</b></span>
+            <span>Title <b>Salvage</b></span>
+            <span>Location <b>McCarran, NV</b></span>
+          </div>
+          <div class="lot-price-row">
+            <span class="now">Est. all-in ~$17,600</span>
+            <button class="lot-btn">Quote This</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="disclosure-note">
+      Lotrunner is an independent buying &amp; bidding concierge. We are not affiliated with, endorsed by, or an agent of any auction platform. Vehicles are sourced from licensed salvage and insurance auction networks on your behalf; final purchase is made under our own auction account and title is transferred to you at close.
+    </div>
+  </div>
+</section>
+
+<div class="tear on-asphalt"></div>
+
+<section class="section on-asphalt" id="quote">
+  <div class="wrap">
+    <div class="sec-eyebrow">Transparent pricing</div>
+    <h2 class="sec-h">See your fee before you send a dollar</h2>
+    <p class="sec-lead">Move the slider or type an amount — the math is always the same: hammer price, plus real auction fees, plus a flat 10% Lotrunner service charge. Nothing hidden at pickup.</p>
+
+    <div class="calc-grid">
+      <div>
+        <div class="field">
+          <label for="hammer">Expected winning bid ($)</label>
+          <input type="number" id="hammer" value="9850" min="0" step="50">
+        </div>
+        <div class="field">
+          <label for="auctionfee">Estimated auction &amp; doc fees ($)</label>
+          <input type="number" id="auctionfee" value="680" min="0" step="10">
+        </div>
+        <div class="field">
+          <label for="feepct">Lotrunner service fee</label>
+          <select id="feepct">
+            <option value="0.10" selected>10% — Standard</option>
+            <option value="0.08">8% — Repeat customer</option>
+            <option value="0.12">12% — Rush / hands-on search</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="quote-ticket">
+        <div class="quote-row"><span class="label">Winning bid / Buy-It-Now</span><span class="val" id="q-hammer">$9,850</span></div>
+        <div class="quote-row"><span class="label">Auction &amp; doc fees</span><span class="val" id="q-auctionfee">$680</span></div>
+        <div class="quote-row fee"><span class="label">Lotrunner service fee</span><span class="val" id="q-fee">$1,053</span></div>
+        <div class="quote-row total"><span class="label">Total you pay</span><span class="val" id="q-total">$11,583</span></div>
+        <div class="quote-fine">Service fee is calculated on the winning bid amount only, not on auction fees or taxes. This is an estimate — your locked quote arrives after we confirm the live listing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear"></div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="sec-eyebrow">While you wait</div>
+    <h2 class="sec-h">Track it like a shipment, not a mystery</h2>
+    <p class="sec-lead">Every request gets a live status tracker so you're never wondering whether we've even started bidding.</p>
+
+    <div class="dash">
+      <div class="dash-head">
+        <span class="h">Request #LR-2291 — 2021 Honda CR-V 1.5L</span>
+        <span class="status-pill">Bidding Live</span>
+      </div>
+      <div class="track">
+        <div class="track-step done"><div class="node"></div><div class="t-label">Quote<br>Approved</div></div>
+        <div class="track-step done"><div class="node"></div><div class="t-label">Deposit<br>Received</div></div>
+        <div class="track-step active"><div class="node"></div><div class="t-label">Bidding<br>Live</div></div>
+        <div class="track-step"><div class="node"></div><div class="t-label">Won &amp;<br>Invoiced</div></div>
+        <div class="track-step"><div class="node"></div><div class="t-label">Ready for<br>Pickup</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="tear on-asphalt"></div>
+
+<section class="section on-asphalt" id="request">
+  <div class="wrap">
+    <div class="sec-eyebrow">Start a request</div>
+    <h2 class="sec-h" style="color:var(--chalk)">Tell us what you're after</h2>
+    <p class="sec-lead">A specific lot number gets the fastest quote. No lot in mind? Give us the make, model, year range, and budget and we'll go find one.</p>
+
+    <div class="req-panel">
+      <form class="req-form-grid" onsubmit="return false;">
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" placeholder="Jordan Reyes">
+        </div>
+        <div class="field">
+          <label>Phone or email</label>
+          <input type="text" placeholder="jordan@email.com">
+        </div>
+        <div class="field">
+          <label>Auction lot # (if known)</label>
+          <input type="text" placeholder="e.g. 48291">
+        </div>
+        <div class="field">
+          <label>Max budget, all-in ($)</label>
+          <input type="number" placeholder="12000">
+        </div>
+        <div class="field">
+          <label>Make &amp; model</label>
+          <input type="text" placeholder="Honda CR-V">
+        </div>
+        <div class="field">
+          <label>Year range</label>
+          <input type="text" placeholder="2018 - 2023">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label>Anything else we should know</label>
+          <input type="text" placeholder="Preferred title type, location, timeline...">
+        </div>
+        <div class="req-submit" style="grid-column:1/-1;">
+          <button class="btn-primary" type="submit">Send Request — No Payment Yet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">LOTRUNNER<br><span style="font-family:var(--body);font-weight:400;font-size:13px;color:#8a8578;">Salvage &amp; auction buying concierge.</span></div>
+      <div class="foot-legal">
+        Lotrunner is an independent vehicle-sourcing service. We are not affiliated with, sponsored by, or acting as an agent of SalvageBid, IAA, Copart, or any auction platform referenced. Purchases are made under our own licensed auction account on the customer's behalf for a disclosed service fee. Vehicle condition, title status, and auction data are sourced from the originating platform at time of bid and are subject to that platform's own terms.
+      </div>
+    </div>
+    <div>© 2026 Lotrunner. All lot numbers and prices shown are illustrative examples.</div>
+  </div>
+</footer>
+
+<script>
+  const hammer = document.getElementById('hammer');
+  const auctionfee = document.getElementById('auctionfee');
+  const feepct = document.getElementById('feepct');
+  const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+
+  function recalc(){
+    const h = parseFloat(hammer.value) || 0;
+    const a = parseFloat(auctionfee.value) || 0;
+    const pct = parseFloat(feepct.value);
+    const fee = h * pct;
+    const total = h + a + fee;
+    document.getElementById('q-hammer').textContent = fmt(h);
+    document.getElementById('q-auctionfee').textContent = fmt(a);
+    document.getElementById('q-fee').textContent = fmt(fee);
+    document.getElementById('q-total').textContent = fmt(total);
+  }
+  [hammer, auctionfee, feepct].forEach(el => el.addEventListener('input', recalc));
+  recalc();
+</script>
+
+</body>
+</html>

@@ -32,7 +32,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               or acting as an agent of any auction platform referenced. Purchases are made under our own
               licensed auction account on the customer&apos;s behalf for a disclosed service fee.
             </p>
-            <div style={{ marginTop: 16 }}>© {new Date().getFullYear()} Lotrunner.</div>
+            <div style={{ marginTop: 16, display: "flex", gap: 16, flexWrap: "wrap" }}>
+              <Link href="/terms" style={{ color: "#8a8578", textDecoration: "underline" }}>Terms of Service</Link>
+              <Link href="/privacy" style={{ color: "#8a8578", textDecoration: "underline" }}>Privacy Policy</Link>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              © {new Date().getFullYear()} Lotrunner. Exchange rates by{" "}
+              <a href="https://www.exchangerate-api.com" style={{ color: "#8a8578" }}>
+                ExchangeRate-API
+              </a>
+              .
+            </div>
           </div>
         </footer>
       </body>

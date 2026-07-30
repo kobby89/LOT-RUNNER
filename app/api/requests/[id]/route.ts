@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { calculateQuote } from "@/lib/fee";
+import { sendQuoteReadyEmail, sendWonEmail, sendReadyForPickupEmail } from "@/lib/email";
 
 // GET /api/requests/:id — powers the customer-facing dashboard/tracker page.
 // Deliberately returns only what a customer should see about their own request.
@@ -85,7 +86,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     },
   });
 
-  // TODO: fire a Resend email here on status change (quote ready, won, invoiced...).
+  const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
+  const dashboardUrl = `${origin}/dashboard/${updated.id}`;
+
+  if (status === "QUOTE_SENT" && updated.quotedTotal) {
+    await sendQuoteReadyEmail(updated.contactEmail, updated.customerName, dashboardUrl, updated.quotedTotal);
+  }
+  if (status === "WON" && updated.quotedHammer) {
+    await sendWonEmail(updated.contactEmail, updated.customerName, dashboardUrl, updated.quotedHammer);
+  }
+  if (status === "READY_FOR_PICKUP") {
+    await sendReadyForPickupEmail(updated.contactEmail, updated.customerName, dashboardUrl);
+  }
 
   return NextResponse.json({ request: updated });
 }

@@ -43,6 +43,11 @@ model Request {
   yearRangeMax Int?
   maxBudget   Float?    // customer's all-in ceiling
   notes       String?
+  // Every other "Find Vehicle" filter (loss type, damage, title type,
+  // odometer, fuel, transmission, colors, etc.) — kept as one flexible
+  // JSON blob instead of two dozen columns, since these are search
+  // preferences, not structured business data we query/report on.
+  searchCriteria Json?
 
   // --- our quote (set once we've reviewed the real listing) ---
   quotedHammer      Float?   // expected/actual winning bid

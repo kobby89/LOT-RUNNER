@@ -3,8 +3,19 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <>
-      <section className="section on-asphalt" style={{ paddingTop: 70, paddingBottom: 70 }}>
-        <div className="wrap">
+      <section
+        className="section on-asphalt"
+        style={{
+          paddingTop: 90,
+          paddingBottom: 90,
+          position: "relative",
+          backgroundImage:
+            "linear-gradient(100deg, rgba(28,27,25,0.96) 0%, rgba(28,27,25,0.86) 42%, rgba(28,27,25,0.55) 100%), url(/images/hero-car.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center 40%",
+        }}
+      >
+        <div className="wrap" style={{ position: "relative", zIndex: 1 }}>
           <div className="sec-eyebrow">Salvage &amp; insurance-auction concierge</div>
           <h1 style={{ fontSize: 48, lineHeight: 1.05, margin: "0 0 20px", maxWidth: 640 }}>
             You don&apos;t need a dealer license. <span style={{ color: "var(--safety)" }}>You need us.</span>

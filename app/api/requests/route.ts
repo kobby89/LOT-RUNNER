@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { sendRequestReceivedEmail } from "@/lib/email";
 
 const NewRequestSchema = z.object({
   customerName: z.string().min(1),
@@ -12,6 +13,7 @@ const NewRequestSchema = z.object({
   yearRangeMax: z.number().int().optional(),
   maxBudget: z.number().positive().optional(),
   notes: z.string().optional(),
+  searchCriteria: z.record(z.string()).optional(),
 });
 
 // POST /api/requests — a customer submits a new car request.
@@ -33,7 +35,12 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  // TODO: send a "we got your request" email via Resend here.
+  const origin = req.headers.get("origin") || `https://${req.headers.get("host")}`;
+  await sendRequestReceivedEmail(
+    request.contactEmail,
+    request.customerName,
+    `${origin}/dashboard/${request.id}`
+  );
 
   return NextResponse.json({ request }, { status: 201 });
 }

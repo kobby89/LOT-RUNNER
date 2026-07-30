@@ -9,6 +9,7 @@ type Req = {
   lotNumber?: string;
   makeModel?: string;
   maxBudget?: number;
+  searchCriteria?: Record<string, string>;
   status: string;
   quotedHammer?: number;
   quotedAuctionFees?: number;
@@ -115,7 +116,14 @@ function RequestRow({ request, onSave }: { request: Req; onSave: (patch: any) =>
   return (
     <tr>
       <td>{request.customerName}<br /><span style={{ color: "#8a8578" }}>{request.contactEmail}</span></td>
-      <td>{request.lotNumber || request.makeModel || "—"}</td>
+      <td>
+        {request.lotNumber || request.makeModel || "—"}
+        {request.searchCriteria && Object.keys(request.searchCriteria).length > 0 && (
+          <div style={{ fontSize: 11, color: "#8a8578", marginTop: 4, fontFamily: "var(--mono)" }}>
+            {Object.entries(request.searchCriteria).map(([k, v]) => `${k}: ${v}`).join(", ")}
+          </div>
+        )}
+      </td>
       <td>{request.maxBudget ? `$${request.maxBudget}` : "—"}</td>
       <td>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatUSD } from "@/lib/fee";
+import DepositButton from "@/components/DepositButton";
 
 const STEPS = [
   { key: "QUOTE_APPROVED", label: "Quote\nApproved" },
@@ -70,6 +71,42 @@ export default async function DashboardPage({ params }: { params: { id: string }
             <div className="quote-row"><span className="label">Auction &amp; doc fees</span><span className="val">{formatUSD(request.quotedAuctionFees || 0)}</span></div>
             <div className="quote-row fee"><span className="label">Lotrunner service fee ({Math.round(request.feePercent * 100)}%)</span><span className="val">{formatUSD((request.quotedTotal || 0) - (request.quotedHammer || 0) - (request.quotedAuctionFees || 0))}</span></div>
             <div className="quote-row total"><span className="label">Total</span><span className="val">{formatUSD(request.quotedTotal)}</span></div>
+
+            {request.status === "QUOTE_APPROVED" && (
+              <DepositButton
+                requestId={request.id}
+                wireInstructions={{
+                  bankName: process.env.WIRE_BANK_NAME || "Not configured yet",
+                  accountName: process.env.WIRE_ACCOUNT_NAME || "Not configured yet",
+                  accountNumber: process.env.WIRE_ACCOUNT_NUMBER || "Not configured yet",
+                  routingNumber: process.env.WIRE_ROUTING_NUMBER || "Not configured yet",
+                  swift: process.env.WIRE_SWIFT || "Not configured yet",
+                }}
+              />
+            )}
+            {request.status === "QUOTE_SENT" && (
+              <p style={{ fontSize: 13, color: "#6b6759", marginTop: 14, fontFamily: "var(--mono)" }}>
+                Approve this quote with us before paying a deposit — reply to your confirmation email
+                or contact us to lock it in.
+              </p>
+            )}
+          </div>
+        )}
+
+        {(request.status === "WON" || request.status === "INVOICED" || request.status === "READY_FOR_PICKUP") && (
+          <div className="ticket" style={{ marginTop: 28, maxWidth: 420, transform: "none" }}>
+            <div className="ticket-top">
+              <span className="lot">LOT — {request.lotNumber || "N/A"}</span>
+              <span className="stamp">WON</span>
+            </div>
+            <div className="ticket-car">{request.makeModel || "Your vehicle"}</div>
+            <div className="ticket-meta">
+              <span>Won for {formatUSD(request.quotedHammer || 0)}</span>
+            </div>
+            <p style={{ fontSize: 13, color: "#6b6759", margin: 0 }}>
+              Congratulations — we won this at auction on your behalf. Check the timeline below for
+              pickup and title-transfer next steps.
+            </p>
           </div>
         )}
 

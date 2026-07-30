@@ -1,17 +1,20 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.NOTIFY_FROM_EMAIL || "quotes@lotrunner.example";
 
 async function send(to: string, subject: string, html: string) {
   // Silently no-op if Resend isn't configured yet, rather than crashing
   // the request that triggered this — email is a nice-to-have, not
-  // something that should break the actual status update.
+  // something that should break the actual status update. The client
+  // is created here (not at the top of the file) so that just
+  // *importing* this file doesn't require the key to exist — that was
+  // breaking the Vercel build before any request ever ran.
   if (!process.env.RESEND_API_KEY) {
     console.log(`[email skipped — no RESEND_API_KEY] Would send "${subject}" to ${to}`);
     return;
   }
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({ from: FROM, to, subject, html });
   } catch (err) {
     console.error("Email send failed:", err);
